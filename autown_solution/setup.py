@@ -29,6 +29,7 @@ setup(
     entry_points={
         'console_scripts': [
             'mission_commander = autown_solution.mission_commander:main',
+            'odom_converter = autown_solution.odom_converter:main',
         ],
     },
 )

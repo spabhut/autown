@@ -12,11 +12,15 @@ def generate_launch_description():
 
     qgc_path = os.path.join(os.getenv('HOME'), 'Documents', 'autown', 'QGroundControl-x86_64.AppImage')
 
+    rviz_config_file = os.path.join(os.getenv('HOME'), 'Documents', 'autown', 'autown_solution', 'src', 'autown_solution', 'rviz', 'autown.rviz')
+
+
     # --- 1. QGroundControl (New!) ---
     qgc_process = ExecuteProcess(
         cmd=[qgc_path],
         output='screen'
     )
+
 
     # --- 2. MicroXRCEAgent (Communication) ---
     micro_xrce_agent = ExecuteProcess(
@@ -52,10 +56,47 @@ def generate_launch_description():
         ],
         output='screen'
     )
+    
+    odom_converter = Node(
+		package='autown_solution',      # Your package name
+		executable='odom_converter',   # The name you defined in setup.py
+		name='odom_converter',
+		output='screen',
+		parameters=[{'use_sim_time': True}]
+    )
+
+    camera_tf = Node(
+            package='tf2_ros',
+            executable='static_transform_publisher',
+            name='camera_static_tf',
+            arguments = [
+                '--x', '0.15',
+                '--y', '0.03',
+                '--z', '0.242',
+                '--roll', '0',
+                '--pitch', '0.733',
+                '--yaw', '0',
+                '--frame-id', 'base_link',
+                '--child-frame-id', 'camera_link'
+            ],
+            # If using simulation time, uncomment the line below
+            # parameters=[{'use_sim_time': True}]
+    )
+
+    rviz = Node(
+            package='rviz2',
+            executable='rviz2',
+            name='rviz2',
+            arguments=['-d', rviz_config_file],
+            output='screen'
+    )
 
     return LaunchDescription([
         qgc_process,
         micro_xrce_agent,
         px4_sitl,
         ros_gz_bridge,
+        odom_converter,
+        camera_tf,
+        rviz
     ])
